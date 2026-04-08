@@ -18,7 +18,7 @@
                         <label class="form-label fw-semibold">Exam Title <span class="text-danger">*</span></label>
                         <input type="text" name="title"
                                class="form-control @error('title') is-invalid @enderror"
-                               value="{{ old('title') }}" placeholder="e.g. Mathematics Final Exam">
+                               value="{{ old('title') }}" placeholder="e.g. Java Exam">
                         @error('title')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -28,7 +28,7 @@
                         <label class="form-label fw-semibold">Description</label>
                         <textarea name="description" rows="3"
                                   class="form-control @error('description') is-invalid @enderror"
-                                  placeholder="Optional description...">{{ old('description') }}</textarea>
+                                  placeholder="Description about exam">{{ old('description') }}</textarea>
                         @error('description')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror

@@ -15,13 +15,13 @@ class ExamController extends Controller
     public function index()
     {
         $exams = Exam::where('status', 'active')
-                     ->withCount('questions')
-                     ->get();
+            ->withCount('questions')
+            ->get();
 
         $attemptedExamIds = StudentExamAttempt::where('user_id', Auth::id())
-                            ->where('status', 'submitted')
-                            ->pluck('exam_id')
-                            ->toArray();
+            ->where('status', 'submitted')
+            ->pluck('exam_id')
+            ->toArray();
 
         return view('student.exams.index', compact('exams', 'attemptedExamIds'));
     }
@@ -29,13 +29,13 @@ class ExamController extends Controller
     public function start(Exam $exam)
     {
         $alreadyAttempted = StudentExamAttempt::where('user_id', Auth::id())
-                            ->where('exam_id', $exam->id)
-                            ->where('status', 'submitted')
-                            ->exists();
+            ->where('exam_id', $exam->id)
+            ->where('status', 'submitted')
+            ->exists();
 
         if ($alreadyAttempted) {
             return redirect()->route('student.exams.index')
-                             ->with('error', 'You have already attempted this exam!');
+                ->with('error', 'You have already attempted this exam!');
         }
 
         return view('student.exams.start', compact('exam'));
@@ -44,13 +44,13 @@ class ExamController extends Controller
     public function take(Exam $exam)
     {
         $alreadyAttempted = StudentExamAttempt::where('user_id', Auth::id())
-                            ->where('exam_id', $exam->id)
-                            ->where('status', 'submitted')
-                            ->exists();
+            ->where('exam_id', $exam->id)
+            ->where('status', 'submitted')
+            ->exists();
 
         if ($alreadyAttempted) {
             return redirect()->route('student.exams.index')
-                             ->with('error', 'You have already attempted this exam!');
+                ->with('error', 'You have already attempted this exam!');
         }
 
         $attempt = StudentExamAttempt::firstOrCreate(
@@ -65,11 +65,12 @@ class ExamController extends Controller
         );
 
         $questions = $exam->questions()->with('options')->get();
-        $timeLeft  = $exam->duration * 60;
+
+        $timeLeft = $exam->duration * 60; // default full time
 
         if ($attempt->started_at) {
             $elapsed  = now()->diffInSeconds($attempt->started_at);
-            $timeLeft = max(0, ($exam->duration * 60) - $elapsed);
+            $timeLeft = (int) max(0, ($exam->duration * 60) - $elapsed);
         }
 
         return view('student.exams.take', compact('exam', 'attempt', 'questions', 'timeLeft'));
@@ -78,15 +79,15 @@ class ExamController extends Controller
     public function submit(Request $request, Exam $exam)
     {
         $attempt = StudentExamAttempt::where('user_id', Auth::id())
-                   ->where('exam_id', $exam->id)
-                   ->where('status', 'in_progress')
-                   ->firstOrFail();
+            ->where('exam_id', $exam->id)
+            ->where('status', 'in_progress')
+            ->firstOrFail();
 
         if ($request->answers) {
             foreach ($request->answers as $questionId => $answer) {
                 $existing = StudentAnswer::where('attempt_id', $attempt->id)
-                            ->where('question_id', $questionId)
-                            ->first();
+                    ->where('question_id', $questionId)
+                    ->first();
 
                 $question = $exam->questions()->find($questionId);
 
@@ -118,13 +119,13 @@ class ExamController extends Controller
         foreach ($exam->questions as $question) {
             if ($question->question_type === 'mcq') {
                 $studentAnswer = StudentAnswer::where('attempt_id', $attempt->id)
-                                 ->where('question_id', $question->id)
-                                 ->first();
+                    ->where('question_id', $question->id)
+                    ->first();
 
                 if ($studentAnswer && $studentAnswer->option_id) {
                     $correctOption = $question->options()
-                                     ->where('is_correct', true)
-                                     ->first();
+                        ->where('is_correct', true)
+                        ->first();
                     if ($correctOption && $studentAnswer->option_id == $correctOption->id) {
                         $obtainedMarks += $question->marks;
                     }
@@ -133,8 +134,8 @@ class ExamController extends Controller
         }
 
         $percentage = ($exam->total_marks > 0)
-                      ? round(($obtainedMarks / $exam->total_marks) * 100, 2)
-                      : 0;
+            ? round(($obtainedMarks / $exam->total_marks) * 100, 2)
+            : 0;
 
         $status = $obtainedMarks >= $exam->pass_marks ? 'pass' : 'fail';
 
@@ -154,6 +155,6 @@ class ExamController extends Controller
         ]);
 
         return redirect()->route('student.results.index')
-                         ->with('success', 'Exam submitted successfully!');
+            ->with('success', 'Exam submitted successfully!');
     }
 }

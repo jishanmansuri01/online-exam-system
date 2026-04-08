@@ -1,7 +1,7 @@
 @extends('layouts.student')
 
 @section('title', 'Taking Exam')
-@section('page-title', '{{ $exam->title }}')
+@section('page-title', $exam->title)
 
 @push('styles')
 <style>
@@ -131,7 +131,7 @@
 
 @push('scripts')
 <script>
-    let timeLeft = {{ $timeLeft }};
+    let timeLeft = {{ (int) $timeLeft }};
 
     function pad(n) { return n < 10 ? '0' + n : n; }
 
